@@ -2,9 +2,9 @@
   "name": "redis-lister",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "app.js",
+  "bin": {
+    "redis-linter": "./app.js"
   },
   "author": "",
   "license": "ISC",
