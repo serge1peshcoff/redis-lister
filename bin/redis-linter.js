@@ -60,17 +60,9 @@ available types: ${Object.keys(commands).join(', ')}`);
 });
 
 const screen = blessed.screen();
+const grid = new contrib.grid({ rows: 4, cols: 1, screen });
 
-const readClient = redis.createClient(config.host, {
-  retry_strategy() {
-    return 1000;
-  },
-});
-
-// readClient.on('connect', () => console.log('readClient connected at ' + REDIS_URL));
-// readClient.on('ready', () => console.log('readClient ready'));
-
-const table = contrib.table({
+const table = grid.set(0, 0, 3, 1, contrib.table, {
   keys: true,
   fg: 'white',
   selectedFg: 'white',
@@ -85,12 +77,27 @@ const table = contrib.table({
 });
 
 table.focus();
-screen.append(table);
+
+const log = grid.set(3, 0, 1, 1, contrib.log, {
+  fg: 'blue',
+  selectedFg: 'blue',
+  label: 'Redis log',
+});
+
+const redisClient = redis.createClient(config.host, {
+  retry_strategy() {
+    return 1000;
+  },
+});
+
+redisClient.on('connect', () => log.log(`Redis client connected at ${config.host}`));
+redisClient.on('ready', () => log.log('Redis client ready'));
+redisClient.on('error', err => log.log(`{red-fg}Redis client error: ${err}{/red-fg}`));
+redisClient.on('reconnecting', () => log.log('Redis client reconnecting...'));
+redisClient.on('end', () => log.log('Redis client ended.'));
 
 const headers = ['Key name', 'Key type', 'Command', 'Key value'];
-
 const keysNames = Object.keys(config.keys);
-
 let displayArray;
 
 function checkKeys() {
@@ -108,7 +115,7 @@ function checkKeys() {
     return [commands[keyType][0], name];
   });
 
-  readClient.batch(sentArray).exec((err, replies) => {
+  redisClient.batch(sentArray).exec((err, replies) => {
     displayArray = replies.map((reply, index) => {
       const keyName = keysNames[index];
       const keyType = config.keys[keyName];
