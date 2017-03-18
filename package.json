@@ -6,13 +6,15 @@
   "bin": {
     "redis-linter": "./app.js"
   },
+  "scripts": {
+    "start": "bin/redis-lister.js config.js",
+    "lint": "eslint ."
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.7.5",
-    "log4js": "^1.1.1",
-    "nconf": "^0.8.4",
     "redis": "^2.7.1"
   },
   "devDependencies": {
