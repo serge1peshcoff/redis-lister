@@ -2,9 +2,9 @@
   "name": "redis-lister",
   "version": "1.0.1",
   "description": "",
-  "main": "bin/redis-linter.js",
+  "main": "bin/redis-lister.js",
   "bin": {
-    "redis-linter": "bin/redis-linter.js"
+    "redis-lister": "bin/redis-lister.js"
   },
   "scripts": {
     "start": "bin/redis-lister.js config.js",
