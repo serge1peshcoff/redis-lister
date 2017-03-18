@@ -55,5 +55,6 @@ Note that the `LIST name` command returns `null` if the key is not set, while ot
 
 - `blessed` and `blessed-contrib` - for the fancy UI
 - `redis` - for Redis connection and fetching data.
+- `moment` - for displaying timestamps
 
 
