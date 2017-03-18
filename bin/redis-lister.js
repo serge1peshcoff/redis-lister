@@ -6,6 +6,7 @@ const fs = require('fs');
 const moment = require('moment');
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
+const colors = require('colors/safe');
 
 const constants = require('../lib/constants');
 
@@ -58,9 +59,13 @@ const log = grid.set(3, 0, 1, 1, contrib.log, constants.logOptions);
 table.focus();
 screen.render();
 
-function addToLog(string) {
-  const timestamp = moment().format('MMMM Do YYYY, HH:mm:ss');
-  log.log(`${timestamp}  ${string}`);
+function addToLog(string, color) {
+  const timestamp = moment().format('MMMM Do YYYY HH:mm:ss');
+  if (!color) {
+    log.log(`${timestamp}  ${string}`);
+  } else {
+    log.log(colors[color](`${timestamp}  ${string}`));
+  }
 }
 
 const redisClient = redis.createClient(config.host, {
@@ -71,9 +76,9 @@ const redisClient = redis.createClient(config.host, {
 
 redisClient.on('connect', () => addToLog(`Redis client connected at ${config.host}`));
 redisClient.on('ready', () => addToLog('Redis client ready'));
-redisClient.on('error', err => addToLog(`{red-fg}Redis client error: ${err}{/red-fg}`));
-redisClient.on('reconnecting', () => addToLog('{yellow-fg}Redis client reconnecting...{/yellow-fg}'));
-redisClient.on('end', () => addToLog('{red-fg}Redis client ended.{/red-fg}'));
+redisClient.on('error', err => addToLog(`Redis client error: ${err}`, 'red'));
+redisClient.on('reconnecting', () => addToLog('Redis client reconnecting...', 'yellow'));
+redisClient.on('end', () => addToLog('Redis client ended.', 'red'));
 
 const keysNames = Object.keys(config.keys);
 let displayArray;
