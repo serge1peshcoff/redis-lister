@@ -1,0 +1,10 @@
+{
+  "host": "redis://localhost:6379/0",
+  "keys": {
+    "key1": "zset",
+    "key2": "list",
+    "key3": "hash",
+    "key4": "string"
+  },
+  "updateInterval": 100
+}
