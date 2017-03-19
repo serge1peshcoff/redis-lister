@@ -4,6 +4,7 @@ const redis = require('redis');
 const path = require('path');
 const fs = require('fs');
 const moment = require('moment');
+const deepAssign = require('deep-assign');
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const colors = require('colors/safe');
@@ -25,8 +26,16 @@ try {
   process.exit(1);
 }
 
+
+// Copying commands from input if availale.
+if (config.commands) {
+  config.commands = deepAssign(config.commands, constants.commands);
+} else {
+  config.commands = constants.commands;
+}
+
 // Checking if each field is presented and is the right type.
-Object.keys(constants.configTypes).forEach((field) => {
+Object.keys(constants.requiredFields).forEach((field) => {
   if (!config[field]) {
     console.log(`Parse config error: required field '${field} is missing.`);
     process.exit(1);
@@ -35,17 +44,17 @@ Object.keys(constants.configTypes).forEach((field) => {
   const fieldType = Object.prototype.toString.call(config[field]);
   const fieldTypeTrimmed = fieldType.substring(8, fieldType.length - 1);
 
-  if (fieldTypeTrimmed !== constants.configTypes[field]) {
+  if (fieldTypeTrimmed !== constants.requiredFields[field]) {
     console.log(`Parse config error: field '${field}' is of the type '${fieldTypeTrimmed}', \
-but '${constants.configTypes[field]}' was expected.`);
+but '${constants.requiredFields[field]}' was expected.`);
     process.exit(1);
   }
 });
 
 Object.keys(config.keys).forEach((key) => {
-  if (!constants.commands[config.keys[key]]) {
+  if (!config.commands[config.keys[key]]) {
     console.log(`Parse config error: wrong key type '${config.keys[key]}' was passed, \
-available types: ${Object.keys(constants.commands).join(', ')}`);
+available types: ${Object.keys(config.commands).join(', ')}`);
     process.exit(1);
   }
 });
@@ -87,22 +96,18 @@ function checkKeys() {
   const sentArray = keysNames.map((name) => {
     const keyType = config.keys[name];
 
-    if (!constants.commands[keyType]) {
-      throw new Error(`Not valid key type: ${keyType}, valid are ${Object.keys(constants.commands).join(', ')}`);
+    if (!config.commands[keyType]) {
+      throw new Error(`Not valid key type: ${keyType}, valid are ${Object.keys(config.commands).join(', ')}`);
     }
 
-    if (constants.commands[keyType].length > 1) {
-      return [constants.commands[keyType][0], name, ...constants.commands[keyType][1]];
-    }
-
-    return [constants.commands[keyType][0], name];
+    return config.commands[keyType].replace('%name%', name).split(' ');
   });
 
   redisClient.batch(sentArray).exec((err, replies) => {
     displayArray = replies.map((reply, index) => {
       const keyName = keysNames[index];
       const keyType = config.keys[keyName];
-      const command = constants.commands[keyType][0];
+      const command = config.commands[keyType];
       const response = (reply != undefined) ? reply : '[nil]';
 
       return [keyName, keyType, command, response];

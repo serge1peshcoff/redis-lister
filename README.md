@@ -27,9 +27,11 @@ The second argument to `redis-lister` should be an absolute or a relative path t
 The fields that are used:
 - **host** - A connection string to connect to Redis. Example: `redis://localhost:6379/0`
 - **keys** - List of monitored keys. An object.
+- **commands** List of custom commands (see below). Not necessary.
 - **updateInterval** - A number that specifies an interval (in millisecons - 1000 === 1s) of keys refreshing. Example: `100`.
 
-The `keys` object contains a list of monitored keys, where key name is a Redis key name, and the key value is the Redis key type, one of those: `string`, `hash`, `list`, `set`, `zset`. Example:
+The `keys` object contains a list of monitored keys, where key name is a Redis key name, and the key value is a Redis command keyword (see the already defined keywords below).
+Example:
 
     "keys": {
       "key1": "zset",
@@ -43,15 +45,24 @@ If the config is wrong, an error will be thrown.
 
 ## How does it work?
 This tool sends a `batch` query to a Redis server each `updateInterval` milliseconds. After that, it uses `blessed` and `blessed-contrib` to display the result.
-The commands that are used to get key info are dependent on a key type:
- - **string** - `LIST name`
- - **hash** - `HLEN name`
- - **list** - `LLEN name`
- - **set** - `SCARD name`
- - **zset** - `ZRANGE name -inf +inf`
+The prefedined commands keywords are :
+ - **get** - `GET name`
+ - **hlen** - `HLEN name`
+ - **llen** - `LLEN name`
+ - **scard** - `SCARD name`
+ - **zrange** - `ZRANGE name -inf +inf`
 
-If the key contains a value of the wront type, the error message will be dislayed instead of the result.
+If the key contains a value of the wrong type, the error message will be dislayed instead of the result.
 Note that the `LIST name` command returns `null` if the key is not set, while other commands return `0`.
+
+You can define your own commands by settig the `commands` field, where the key is the command keyword and the value is a command (`%NAME%` is replaced by key name). Example:
+
+    "commands": {
+      "listitems": "lrange %name% 0 -1"
+    },
+    "keys": {
+      "list": "listitems"
+    }
 
 ## Dependencies
 

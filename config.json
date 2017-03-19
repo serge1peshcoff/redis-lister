@@ -1,11 +1,15 @@
 {
   "host": "redis://localhost:6379/0",
+  "commands": {
+    "listitems": "lrange %name% 0 -1"
+  },
   "keys": {
-    "set": "set",
-    "zset": "zset",
-    "list": "list",
-    "hash": "hash",
-    "string": "string"
+    "set": "scard",
+    "zset": "zcount",
+    "list": "llen",
+    "hash": "hlen",
+    "string": "get",
+    "list2": "listitems"
   },
   "updateInterval": 100
 }
