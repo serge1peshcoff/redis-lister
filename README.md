@@ -70,5 +70,6 @@ You can define your own commands by settig the `commands` field, where the key i
 - `redis` - for Redis connection and fetching data.
 - `moment` - for displaying timestamps
 - `colors` - for fancy colored log output
+- `deep-assign` - for loading user settings
 
 
